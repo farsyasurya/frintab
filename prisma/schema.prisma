@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String          @id @default(uuid())
+  name         String
+  email        String          @unique
+  password     String
+  createdAt    DateTime        @default(now())
+  memberships  SavingsMember[]
+  transactions Transaction[]
+}
+
+model SavingsGroup {
+  id           String          @id @default(uuid())
+  name         String
+  groupCode    String          @unique
+  createdAt    DateTime        @default(now())
+  members      SavingsMember[]
+  transactions Transaction[]
+}
+
+model SavingsMember {
+  id      String       @id @default(uuid())
+  userId  String
+  groupId String
+  group   SavingsGroup @relation(fields: [groupId], references: [id])
+  user    User         @relation(fields: [userId], references: [id])
+
+  @@unique([userId, groupId])
+}
+
+model Transaction {
+  id        String          @id @default(uuid())
+  type      TransactionType
+  amount    Int
+  note      String?
+  createdAt DateTime        @default(now())
+  userId    String
+  groupId   String
+  group     SavingsGroup    @relation(fields: [groupId], references: [id])
+  user      User            @relation(fields: [userId], references: [id])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
+}
