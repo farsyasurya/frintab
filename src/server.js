@@ -1,8 +1,10 @@
-require("dotenv").config();
-const app = require("./app");
+import express from "express"
+import serverless from "serverless-http"
+import routes from "../src/routes"
 
-const PORT = process.env.PORT || 5000;
+const app = express()
 
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-});
+app.use(express.json())
+app.use("/api", routes)
+
+export const handler = serverless(app)
